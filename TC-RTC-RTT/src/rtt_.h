@@ -9,11 +9,11 @@
 #ifndef RTT__H_
 #define RTT__H_
 
-// led2
-#define LED2_PIO           PIOC
-#define LED2_PIO_ID        ID_PIOC
-#define LED2_PIO_IDX       30
-#define LED2_PIO_IDX_MASK  (1u << LED2_PIO_IDX)
+// led3
+#define LED3_PIO           PIOB
+#define LED3_PIO_ID        ID_PIOB
+#define LED3_PIO_IDX       2
+#define LED3_PIO_IDX_MASK  (1u << LED3_PIO_IDX)
 
 volatile Bool f_rtt_alarme = false;
 
@@ -32,7 +32,7 @@ void RTT_Handler(void)
 
   /* IRQ due to Alarm */
   if ((ul_status & RTT_SR_ALMS) == RTT_SR_ALMS) {
-      pin_toggle(LED2_PIO, LED2_PIO_IDX_MASK);    // BLINK Led
+      pin_toggle(LED3_PIO, LED3_PIO_IDX_MASK);    // BLINK Led
       f_rtt_alarme = true;                  // flag RTT alarme
    }  
 }

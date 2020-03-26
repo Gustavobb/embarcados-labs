@@ -15,7 +15,14 @@
 #define LED1_PIO_IDX       0
 #define LED1_PIO_IDX_MASK  (1u << LED1_PIO_IDX)
 
-volatile char flag_tc = 0;
+// led2
+#define LED2_PIO           PIOC
+#define LED2_PIO_ID        ID_PIOC
+#define LED2_PIO_IDX       30
+#define LED2_PIO_IDX_MASK  (1u << LED2_PIO_IDX)
+
+volatile char flag_tc_1 = 0;
+volatile char flag_tc_0 = 0;
 
 void TC_init(Tc * TC, int ID_TC, int TC_CHANNEL, int freq);
 
@@ -31,8 +38,22 @@ void TC1_Handler(void){
 	UNUSED(ul_dummy);
 
 	/** Muda o estado do LED */
-	flag_tc = 1;
+	flag_tc_1 = 1;
+}
 
+void TC0_Handler(void){
+	volatile uint32_t ul_dummy;
+
+	/****************************************************************
+	* Devemos indicar ao TC que a interrupção foi satisfeita.
+	******************************************************************/
+	ul_dummy = tc_get_status(TC0, 0);
+
+	/* Avoid compiler warning */
+	UNUSED(ul_dummy);
+
+	/** Muda o estado do LED */
+	flag_tc_0 = 1;
 }
 
 void TC_init(Tc * TC, int ID_TC, int TC_CHANNEL, int freq){

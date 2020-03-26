@@ -9,11 +9,11 @@
 #ifndef RTC__H_
 #define RTC__H_
 
-// led3
-#define LED3_PIO           PIOB
-#define LED3_PIO_ID        ID_PIOB
-#define LED3_PIO_IDX       2
-#define LED3_PIO_IDX_MASK  (1u << LED3_PIO_IDX)
+// led
+#define LED_PIO PIOC
+#define LED_PIO_ID ID_PIOC
+#define LED_PIN_IDX 8
+#define LED_PIO_IDX_MASK (1u << LED_PIN_IDX)
 
 typedef struct  {
 	uint32_t year;

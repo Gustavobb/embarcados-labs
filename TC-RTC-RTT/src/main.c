@@ -32,6 +32,7 @@ void init(void) {
 	pio_set(LED3_PIO, LED3_PIO_IDX_MASK);
 	
 	TC_init(TC0, ID_TC1, 1, 4);
+	TC_init(TC0, ID_TC0, 0, 5);
 	
 	calendar rtc_initial = {2018, 3, 19, 12, 15, 45 ,1};
 	RTC_init(RTC, ID_RTC, rtc_initial, RTC_IER_ALREN);
@@ -52,7 +53,7 @@ int main (void)
   
   while(1) {
 	  
-	if(flag_tc) {
+	if(flag_tc_1) {
 		
 		for (int i = 0; i < 1; i++){
 			pio_clear(LED1_PIO, LED1_PIO_IDX_MASK);
@@ -61,7 +62,19 @@ int main (void)
 			delay_ms(10);
 		}
 		
-		flag_tc = 0;
+		flag_tc_1 = 0;
+	}
+	
+	if(flag_tc_0) {
+		
+		for (int i = 0; i < 1; i++){
+			pio_clear(LED2_PIO, LED2_PIO_IDX_MASK);
+			delay_ms(10);
+			pio_set(LED2_PIO, LED2_PIO_IDX_MASK);
+			delay_ms(10);
+		}
+		
+		flag_tc_0 = 0;
 	}
 	
 	if (f_rtt_alarme) {
@@ -79,9 +92,9 @@ int main (void)
      if(flag_rtc) {
 		
 		for (int i = 0; i < 5; i++){
-			pio_clear(LED3_PIO, LED3_PIO_IDX_MASK);
+			pio_clear(LED_PIO, LED_PIO_IDX_MASK);
 			delay_ms(200);
-			pio_set(LED3_PIO, LED3_PIO_IDX_MASK);
+			pio_set(LED_PIO, LED_PIO_IDX_MASK);
 			delay_ms(200);
 		}
 		
