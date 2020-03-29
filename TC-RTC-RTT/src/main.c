@@ -6,6 +6,7 @@
 #include "tc_.h"
 #include "rtt_.h"
 #include "rtc_.h"
+#define STR_SIZE 2
 
 void init(void) {
 	
@@ -35,7 +36,7 @@ void init(void) {
 	TC_init(TC0, ID_TC0, 0, 5);
 	
 	calendar rtc_initial = {2018, 3, 19, 12, 15, 45 ,1};
-	RTC_init(RTC, ID_RTC, rtc_initial, RTC_IER_ALREN);
+	RTC_init(RTC, ID_RTC, rtc_initial, RTC_IER_ALREN | RTC_IER_SECEN);
 
 	/* configura alarme do RTC */
 	rtc_set_date_alarm(RTC, 1, rtc_initial.month, 1, rtc_initial.day);
@@ -45,14 +46,23 @@ void init(void) {
 int main (void)
 {
   init();
-
-  gfx_mono_draw_filled_circle(20, 16, 16, GFX_PIXEL_SET, GFX_WHOLE);
-  gfx_mono_draw_string("mundo", 50,16, &sysfont);
+  
+  uint32_t hour;
+  uint32_t seconds;
+  uint32_t minutes;
+  
+  char time[STR_SIZE];
 
   f_rtt_alarme = true;
   
   while(1) {
-	  
+	
+	rtc_get_time(RTC, &hour, &minutes, &seconds);
+	
+	sprintf(time, "%d:%d:%d", hour, minutes, seconds);
+
+	gfx_mono_draw_string(time, 30, 16, &sysfont);
+	
 	if(flag_tc_1) {
 		
 		for (int i = 0; i < 1; i++){
