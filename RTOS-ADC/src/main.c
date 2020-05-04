@@ -289,6 +289,11 @@ void task_adc(void){
 	xSemaphore = xSemaphoreCreateBinary();
 	adcData adc;
 
+	// 4095 - pi
+	// x - atual
+	
+	// x em radianos, faz seno para descobrir x1 e y1
+	
 	while(1){
 		
 		if( xSemaphoreTake(xSemaphore, ( TickType_t ) 500) == pdTRUE )
@@ -297,7 +302,7 @@ void task_adc(void){
 				
 			adc.value = g_ul_value;
 			xQueueSendFromISR(xQueueADC, &adc, 0);
-			vTaskDelay(500);
+			vTaskDelay(200);
 
 			/* Selecina canal e inicializa conversão */
 			afec_channel_enable(AFEC_POT, AFEC_POT_CHANNEL);
