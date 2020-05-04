@@ -174,9 +174,9 @@ static void task_monitor(void *pvParameters)
 	const TickType_t xDelay = 3000 / portTICK_PERIOD_MS;
 	
 	for (;;) {
-		printf("--- task ## %u\n", (unsigned int)uxTaskGetNumberOfTasks());
+		//printf("--- task ## %u\n", (unsigned int)uxTaskGetNumberOfTasks());
 		vTaskList((signed portCHAR *)szList);
-		printf(szList);
+		//printf(szList);
 		vTaskDelay(xDelay);
 	}
 }
@@ -187,14 +187,11 @@ static void task_uartRX(void *pvParameters) {
 	char id;
 
 	for (;;) {
-		printf("aaaaaaa\n");
 		// aguarda por até 500 ms pelo se for liberado entra no if
 		if(xQueueReceiveFromISR( xQueueButId, &id, ( TickType_t ) 100 / portTICK_PERIOD_MS)) {
-			//printf("%c", id);
 			if (id == '\n') {
 				buffer[counter] = 0;
 				counter = 0;
-				printf("%s\n", buffer);
 				xQueueSendFromISR(xQueueCommand, &buffer, 0);
 			}
 			
@@ -210,48 +207,41 @@ static void task_execute(void *pvParameters) {
 	
 	char buffer[20] = {0};
 	xQueueCommand = xQueueCreate(32, sizeof(char[20]) );
-	xQueueCommandTask1 = xQueueCreate(32, sizeof(char[10]));
-	xQueueCommandTask3 = xQueueCreate(32, sizeof(char[10]));
 
 	// verifica se fila foi criada corretamente
 	if (xQueueCommand == NULL) printf("falha em criar a fila \n");
-	
-	// verifica se fila foi criada corretamente
-	if (xQueueCommandTask1 == NULL) printf("falha em criar a fila \n");
-	
-	// verifica se fila foi criada corretamente
-	if (xQueueCommandTask3 == NULL) printf("falha em criar a fila \n");
 	
 	for(;;) {
 		if(xQueueReceiveFromISR( xQueueCommand, &buffer, ( TickType_t ) 100 / portTICK_PERIOD_MS)) {
 			
 			printf("%s\n", buffer);
-			if (!strcmp("led 3 toggle", buffer)) {
+		
+			if (strstr(buffer, "led 3 toggle")) {
 				char command[10] = "toggle";
 				xQueueSendFromISR(xQueueCommandTask3, &command, 0);
 			}
 			
-			else if (!strcmp("led 3 off", buffer)) {
+			else if (strstr(buffer, "led 3 off")) {
 				char command[10] = "off";
 				xQueueSendFromISR(xQueueCommandTask3, &command, 0);
 			}
 			
-			else if (!strcmp("led 3 on", buffer)) {
+			else if (strstr(buffer, "led 3 on")) {
 				char command[10] = "on";
 				xQueueSendFromISR(xQueueCommandTask3, &command, 0);
 			}
 			
-			else if (!strcmp("led 1 toggle", buffer)) {
+			else if (strstr(buffer, "led 1 toggle")) {
 				char command[10] = "toggle";
 				xQueueSendFromISR(xQueueCommandTask1, &command, 0);
 			}
 			
-			else if (!strcmp("led 1 off", buffer)) {
+			else if (strstr(buffer, "led 1 off")) {
 				char command[10] = "off";
 				xQueueSendFromISR(xQueueCommandTask1, &command, 0);
 			}
 			
-			else if (!strcmp("led 1 on", buffer)) {
+			else if (strstr(buffer, "led 1 on")) {
 				char command[10] = "on";
 				xQueueSendFromISR(xQueueCommandTask1, &command, 0);
 			}
@@ -268,11 +258,18 @@ static void task_led1(void *pvParameters)
 	pio_configure(LED1_PIO, PIO_OUTPUT_0, LED1_PIO_IDX_MASK, PIO_DEFAULT);
 	pio_set(LED1_PIO, LED1_PIO_IDX_MASK);
 
+	xQueueCommandTask1 = xQueueCreate(32, sizeof(char[10]));
+
+	// verifica se fila foi criada corretamente
+	if (xQueueCommandTask1 == NULL) printf("falha em criar a fila \n");
+
 	char command[10];
 	
 	for (;;) {
 		if (xQueueReceiveFromISR(xQueueCommandTask1, &command, (TickType_t) 100 / portTICK_PERIOD_MS)) {
-			if (!strcmp("toggle", command)) pin_toggle(LED1_PIO, LED1_PIO_IDX_MASK);
+			if (strstr(command, "toggle")) pin_toggle(LED1_PIO, LED1_PIO_IDX_MASK);
+			if (strstr(command, "on")) pio_clear(LED1_PIO, LED1_PIO_IDX_MASK);
+			if (strstr(command, "off")) pio_set(LED1_PIO, LED1_PIO_IDX_MASK);
 		}
 	}
 }
@@ -286,13 +283,46 @@ static void task_led3(void *pvParameters)
 	pio_configure(LED3_PIO, PIO_OUTPUT_0, LED3_PIO_IDX_MASK, PIO_DEFAULT);
 	pio_set(LED3_PIO, LED3_PIO_IDX_MASK);
 	
+	xQueueCommandTask3 = xQueueCreate(32, sizeof(char[10]));
+	
+	// verifica se fila foi criada corretamente
+	if (xQueueCommandTask3 == NULL) printf("falha em criar a fila \n");
+	
 	char command[10];
 	
 	for (;;) {
 		if (xQueueReceiveFromISR(xQueueCommandTask3, &command, (TickType_t) 100 / portTICK_PERIOD_MS)) {
-			if (!strcmp("toggle", command)) pin_toggle(LED3_PIO, LED3_PIO_IDX_MASK);
+			if (strstr(command, "toggle")) pin_toggle(LED3_PIO, LED3_PIO_IDX_MASK);
+			if (strstr(command, "on")) pio_clear(LED3_PIO, LED3_PIO_IDX_MASK);
+			if (strstr(command, "off")) pio_set(LED3_PIO, LED3_PIO_IDX_MASK);
 		}
 	}
+}
+
+static void configure_console(void)
+{
+	const usart_serial_options_t uart_serial_options = {
+		.baudrate = CONF_UART_BAUDRATE,
+		#if (defined CONF_UART_CHAR_LENGTH)
+		.charlength = CONF_UART_CHAR_LENGTH,
+		#endif
+		.paritytype = CONF_UART_PARITY,
+		#if (defined CONF_UART_STOP_BITS)
+		.stopbits = CONF_UART_STOP_BITS,
+		#endif
+	};
+
+	/* Configure console UART. */
+	stdio_serial_init(CONF_UART, &uart_serial_options);
+
+	/* Specify that stdout should not be buffered. */
+	#if defined(__GNUC__)
+	setbuf(stdout, NULL);
+	#else
+	/* Already the case in IAR's Normal DLIB default configuration: printf()
+	* emits one character at a time.
+	*/
+	#endif
 }
 
 /**
@@ -303,10 +333,8 @@ static void task_led3(void *pvParameters)
 int main(void)
 {
 	/* Initialize the SAM system */
-	printf("aaaaaaa\n");
 	sysclk_init();
 	board_init();
-printf("aaaaaaa\n");
 	// cria fila de 32 slots de char
 	xQueueButId = xQueueCreate(32, sizeof(char) );
 
