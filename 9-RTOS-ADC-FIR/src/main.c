@@ -22,18 +22,22 @@
 
 #define TASK_LCD_STACK_SIZE            (6*1024/sizeof(portSTACK_TYPE))
 #define TASK_LCD_STACK_PRIORITY        (tskIDLE_PRIORITY)
-#define NUM_TAPS   8  // ordem do filtro (quantos coefientes)
+#define NUM_TAPS   12  // ordem do filtro (quantos coefientes)
 #define BLOCK_SIZE 1   // se será processado por blocos, no caso não.
 
 const float32_t firCoeffs32[NUM_TAPS] = {
-	0.12269166637219883,
-	0.12466396327768503,
-	0.1259892807712678,
-	0.12665508957884833,
-	0.12665508957884833,
-	0.1259892807712678,
-	0.12466396327768503,
-	0.12269166637219883
+	0.07930125683894955,
+	0.08147535648783032,
+	0.08323976516671625,
+	0.08457786363832452,
+	0.08547702101550535,
+	0.085928736852674,
+	0.085928736852674,
+	0.08547702101550535,
+	0.08457786363832452,
+	0.08323976516671625,
+	0.08147535648783032,
+	0.07930125683894955
 };
 
 typedef struct {
@@ -340,7 +344,7 @@ void task_lcd(void){
 	  ili9488_set_foreground_color(COLOR_CONVERT(COLOR_BLACK));
 	  ili9488_draw_filled_circle(x, ILI9488_LCD_HEIGHT - plot.raw / 16, 2 );
 	  ili9488_set_foreground_color(COLOR_CONVERT(COLOR_RED));
-	  ili9488_draw_filled_circle(x, ILI9488_LCD_HEIGHT - (plot.raw + 100)/ 16, 2 );
+	  ili9488_draw_filled_circle(x, ILI9488_LCD_HEIGHT - plot.filtrado/ 16, 2 );
       
       printf("%d\n",plot.raw); //printa no terminal o valor de plo.raw
 
