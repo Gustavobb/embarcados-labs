@@ -223,6 +223,10 @@ static void wifi_cb(uint8_t u8MsgType, void *pvMsg)
   }
 }
 
+void command_get(uint8_t *g_sendBuffer, char status[] ) {
+	sprintf(g_sendBuffer, "GET %s HTTP/1.1\r\n Accept: */*\r\n\r\n", status);
+}
+
 /************************************************************************/
 /* TASKS                                                                */
 /************************************************************************/
@@ -263,7 +267,8 @@ static void task_process(void *pvParameters) {
 
       case GET:
       printf("STATE: GET \n");
-      sprintf((char *)g_sendBuffer, MAIN_PREFIX_BUFFER);
+	  command_get(g_sendBuffer, "/status");
+      //sprintf((char *)g_sendBuffer, MAIN_PREFIX_BUFFER);
       send(tcp_client_socket, g_sendBuffer, strlen((char *)g_sendBuffer), 0);
       state = ACK;
       break;
